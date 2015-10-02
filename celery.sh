@@ -1,0 +1,1 @@
+celery -A rlscloud  worker -l debug

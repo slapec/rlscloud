@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+        function loadQueue(url){
+            var states = {
+                0: 'Queued',
+                1: 'Downloading',
+                2: 'Finished',
+                3: 'Error'
+            };
+
+            var tbody = $('#queue-table-body');
+
+            $.ajax(url).success(function(data){
+                tbody.empty();
+                $.each(data, function(i, o){
+                    tbody.append(
+                            '<tr>' +
+                                '<td>' + i +  '</td>' +
+                                '<td>' + o.celery_task + '</td>' +
+                                '<td>' + o.source + '</td>' +
+                                '<td>' + o.status + '</td>' +
+                                '<td>' + states[o.state] + '</td>' +
+                            '</tr>');
+                });
+            });
+        }
+
+        $(document).ready(function(){
+            var refreshRate = 1000;
+            var queueUrl = '{% url "rlsget:queue_json" %}';
+            var enqueueUrl = '{% url "rlsget:enqueue" %}';
+
+            var refresher = function(){
+                loadQueue(queueUrl);
+                setTimeout(refresher, refreshRate);
+            };
+            refresher();
+
+            $('#enqueue-form').on('submit', function(e){
+                e.preventDefault();
+                var params = $(this).serialize();
+
+                $.ajax(enqueueUrl, {
+                    data: params,
+                    method: 'POST'
+                }).success(function(){
+                    loadQueue(queueUrl);
+                })
+            })
+        })
+    </script>
+    <style>
+        #queue-table {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <form id="enqueue-form">
+            {% csrf_token %}
+            <label for="url">URL:</label>
+            <input id="url" name="url">
+        </form>
+        <table id="queue-table">
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Task ID</td>
+                    <td>Source</td>
+                    <td>Status</td>
+                    <td>State</td>
+                </tr>
+            </thead>
+            <tbody id="queue-table-body"></tbody>
+        </table>
+    </div>
+</body>
+</html>
