@@ -1,0 +1,46 @@
+{% load i18n %}
+{% load static %}
+{% load utils %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+        <link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}">
+        <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.css' %}">
+        <link rel="stylesheet" href="{% static 'rlscloud/css/rlscloud.css' %}">
+
+        <script id="rlscloud-urls" type="application/json">
+            {{ rlscloud_urls|json|safe }}
+        </script>
+
+        <script id="rlscloud-options" type="application/json">
+            {{ rlscloud_options|json|safe }}
+        </script>
+
+        <script src="{% static 'jquery/js/jquery-2.1.4.js' %}" type="application/javascript"></script>
+        <script src="{% static 'bootstrap/js/bootstrap.js' %}" type="application/javascript"></script>
+        <script src="{% static 'angularjs/js/angular.js' %}" type="application/javascript"></script>
+        <script src="{% static 'rlscloud/js/rlscloud.js' %}"></script>
+        {% block head %}
+        {% endblock %}
+    </head>
+    <body ng-app="{% block ng-app %}{% endblock %}">
+        <div class="container-fluid">
+            <nav class="navbar navbar-dark bg-inverse">
+                <a class="navbar-brand" href="{% url 'index' %}">rlscloud</a>
+                {% if user.is_authenticated %}
+                <ul class="nav navbar-nav">
+                    <li id="rlsget-queue" class="nav-item">
+                        <a class="nav-link" href="{% url 'rlsget:queue-list' %}">{% trans 'Queue' %}</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </nav>
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>

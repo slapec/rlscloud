@@ -1,0 +1,80 @@
+.empty-queue-cell {
+    text-align: center;
+    color: #55595c;
+}
+
+#queue-table {
+    table-layout: fixed;
+}
+
+#queue-table td {
+    vertical-align: middle!important;
+}
+
+#queue-table .btn-group {
+    min-width: 144px;
+}
+
+.progress {
+    margin-bottom: 0!important;
+}
+
+.progress::after {
+    content: attr(value) '%';
+    display: block;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    top: -18px;
+    color: #373a3c;
+    font-size: smaller;
+}
+
+.center {
+    text-align: center;
+}
+
+.state-icon-col {
+    width: 3em;
+    text-align: center;
+}
+
+.name-col {
+    width: 33%
+}
+
+.progress-col {
+    width: 45%
+}
+
+.operations-col {
+   width: 144px
+}
+
+.details-row td {
+    border-bottom: 3px solid #eceeef;
+    font-size: smaller
+}
+
+.unknown-name {
+    color: #55595c;
+    font-style: italic;
+}
+
+.url {
+    width: 100%;
+    font-size: smaller;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.filename {
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+

@@ -1,83 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script>
-        function loadQueue(url){
-            var states = {
-                0: 'Queued',
-                1: 'Downloading',
-                2: 'Finished',
-                3: 'Error'
-            };
+{% extends 'base.html' %}
 
-            var tbody = $('#queue-table-body');
+{% load i18n %}
+{% load static %}
 
-            $.ajax(url).success(function(data){
-                tbody.empty();
-                $.each(data, function(i, o){
-                    tbody.append(
-                            '<tr>' +
-                                '<td>' + i +  '</td>' +
-                                '<td>' + o.celery_task + '</td>' +
-                                '<td>' + o.source + '</td>' +
-                                '<td>' + o.status + '</td>' +
-                                '<td>' + states[o.state] + '</td>' +
-                            '</tr>');
-                });
-            });
-        }
+{% block head %}
+    <link rel="stylesheet" href="{% static 'rlsget/css/queue.css' %}">
+    <script src="{% static 'rlsget/js/queue.js' %}"></script>
+{% endblock %}
 
-        $(document).ready(function(){
-            var refreshRate = 1000;
-            var queueUrl = '{% url "rlsget:queue_json" %}';
-            var enqueueUrl = '{% url "rlsget:enqueue" %}';
+{% block ng-app %}rlscloud.rlsget.queue{% endblock %}
 
-            var refresher = function(){
-                loadQueue(queueUrl);
-                setTimeout(refresher, refreshRate);
-            };
-            refresher();
-
-            $('#enqueue-form').on('submit', function(e){
-                e.preventDefault();
-                var params = $(this).serialize();
-
-                $.ajax(enqueueUrl, {
-                    data: params,
-                    method: 'POST'
-                }).success(function(){
-                    loadQueue(queueUrl);
-                })
-            })
-        })
-    </script>
-    <style>
-        #queue-table {
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <div id="content">
-        <form id="enqueue-form">
-            {% csrf_token %}
-            <label for="url">URL:</label>
-            <input id="url" name="url">
-        </form>
-        <table id="queue-table">
-            <thead>
-                <tr>
-                    <td>#</td>
-                    <td>Task ID</td>
-                    <td>Source</td>
-                    <td>Status</td>
-                    <td>State</td>
-                </tr>
-            </thead>
-            <tbody id="queue-table-body"></tbody>
-        </table>
+{% block content %}
+    <div class="row" ng-controller="QueueList as queueList">
+        <div class="col-lg-12">
+            <form id="enqueue-form" ng-submit="queueList.enqueueTask()" class="form-group">
+                <input ng-model="url" class="form-control" placeholder="{% trans 'URL' %}">
+            </form>
+        </div>
+        <div class="col-lg-12">
+            <table id="queue-table" class="table">
+                <thead class="thead-default">
+                    <tr>
+                        <th class="state-icon-col"></th>
+                        <th class="name-col">{% trans 'Name' %}</th>
+                        <th class="progress-col">{% trans 'Done' %}</th>
+                        <th class="operations-col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-if="!tasks.length">
+                        <td colspan="4" class="empty-queue-cell">{% trans 'The queue is empty' %}</td>
+                    </tr>
+                    <tr ng-repeat-start="task in tasks">
+                        <td class="center" ng-class="task.state|colorClass"><i class="fa fa-2 fa-[[ task.state|iconClass ]]"></i></td>
+                        <td>
+                            <div class="filename">
+                                <span class="unknown-name" ng-if="!task.filename">{% trans 'Unknown release' %}</span>[[ task.filename ]]</div>
+                            <div class="url">
+                                <a href="[[ task.url ]]" target="_blank">[[ task.url ]]</a>
+                            </div>
+                        </td>
+                        <td>
+                            <progress class="progress progress-info" value="[[ task.$progress|number ]]" max="100"></progress>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-secondary" ng-class="{'active': queueList.isDetailsOpen(task)}" ng-click="queueList.toggleDetails(task)"><i class="fa fa-2 fa-info"></i></button>
+                                <button class="btn btn-secondary"><i class="fa fa-2 fa-times"></i></button>
+                                <button class="btn btn-secondary"><i class="fa fa-2 fa-archive"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr ng-repeat-end ng-if="queueList.isDetailsOpen(task)" class="details-row">
+                        <td></td>
+                        <td colspan="3">
+                            <div>
+                                <span>{% trans 'Created at:' %} [[ task.created_at|date:'yyyy-MM-dd HH:mm:ss' ]]</span>
+                                <span>{% trans 'ID:' %} [[ task.id ]]</span>
+                            </div>
+                            <div>
+                                <span>{% trans 'State:' %} [[ task.state|stateString ]]</span>
+                            </div>
+                            <div>
+                                <span>{% trans 'Download time:' %} [[ task.elapsed ]]</span>
+                                <span>{% trans 'Downloaded bytes:' %} [[ task.downloaded ]]/[[ task.total ]] ([[ task.$progress|percentage ]])</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</body>
-</html>
+{% endblock %}

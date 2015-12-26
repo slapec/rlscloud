@@ -38,12 +38,14 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rls',
-    'rlsget'
+    'rlsget',
+    'utils'
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'rlscloud.middleware.JsonInBodyMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
@@ -57,7 +59,7 @@ ROOT_URLCONF = 'rlscloud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -102,10 +104,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'assets')
+]
+
+# Paths ------------------------------------------------------------------------
+RELEASE_DIRECTORY = os.path.join(BASE_DIR, 'releases')
+YOUTUBE_DL_TEMPLATE = os.path.join(RELEASE_DIRECTORY, '%(title)s.%(ext)s')
+
+# Workarounds ------------------------------------------------------------------
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'
 
 
 # Celery -----------------------------------------------------------------------
-
 CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
