@@ -11,9 +11,9 @@
 {% block ng-app %}rlscloud.rlsget.queue{% endblock %}
 
 {% block content %}
-    <div class="row" ng-controller="QueueList as queueList">
+    <div class="row" ng-controller="QueueList as ctrl" ng-cloak>
         <div class="col-lg-12">
-            <form id="enqueue-form" ng-submit="queueList.enqueueTask()" class="form-group">
+            <form id="enqueue-form" ng-submit="ctrl.enqueueTask()" class="form-group">
                 <input ng-model="url" class="form-control" placeholder="{% trans 'URL' %}">
             </form>
         </div>
@@ -34,8 +34,13 @@
                     <tr ng-repeat-start="task in tasks">
                         <td class="center" ng-class="task.state|colorClass"><i class="fa fa-2 fa-[[ task.state|iconClass ]]"></i></td>
                         <td>
-                            <div class="filename">
-                                <span class="unknown-name" ng-if="!task.filename">{% trans 'Unknown release' %}</span>[[ task.filename ]]</div>
+                            <div ng-if="task.details">
+                                <a ng-href="[[ task.details ]]">[[ task.name ]]</a>
+                            </div>
+                            <div ng-if="!task.details">
+                                <span ng-if="!task.filename" class="unknown-name">{% trans 'Unknown release' %}</span>
+                                <span ng-if="task.filename">[[ task.filename ]]</span>
+                            </div>
                             <div class="url">
                                 <a href="[[ task.url ]]" target="_blank">[[ task.url ]]</a>
                             </div>
@@ -45,26 +50,52 @@
                         </td>
                         <td>
                             <div class="btn-group">
-                                <button class="btn btn-secondary" ng-class="{'active': queueList.isDetailsOpen(task)}" ng-click="queueList.toggleDetails(task)"><i class="fa fa-2 fa-info"></i></button>
-                                <button class="btn btn-secondary"><i class="fa fa-2 fa-times"></i></button>
-                                <button class="btn btn-secondary"><i class="fa fa-2 fa-archive"></i></button>
+                                <button class="btn btn-secondary" ng-class="{'active': ctrl.isDetailsOpen(task)}" ng-click="ctrl.toggleDetails(task)">
+                                    <i class="fa fa-2 fa-info"></i>
+                                </button>
+                                <button class="btn btn-secondary" ng-disabled="[[ !ctrl.isCancelable(task) ]]" ng-click="ctrl.cancel(task)">
+                                    <i class="fa fa-2 fa-times"></i>
+                                </button>
+                                <button class="btn btn-secondary" ng-disabled="[[ !ctrl.isArchivable(task) ]]" ng-click="ctrl.archive(task)">
+                                    <i class="fa fa-2 fa-archive"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
-                    <tr ng-repeat-end ng-if="queueList.isDetailsOpen(task)" class="details-row">
+                    <tr ng-repeat-end ng-if="ctrl.isDetailsOpen(task)" class="details-row">
                         <td></td>
                         <td colspan="3">
-                            <div>
-                                <span>{% trans 'Created at:' %} [[ task.created_at|date:'yyyy-MM-dd HH:mm:ss' ]]</span>
-                                <span>{% trans 'ID:' %} [[ task.id ]]</span>
-                            </div>
-                            <div>
-                                <span>{% trans 'State:' %} [[ task.state|stateString ]]</span>
-                            </div>
-                            <div>
-                                <span>{% trans 'Download time:' %} [[ task.elapsed ]]</span>
-                                <span>{% trans 'Downloaded bytes:' %} [[ task.downloaded ]]/[[ task.total ]] ([[ task.$progress|percentage ]])</span>
-                            </div>
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td>{% trans 'State:' %}</td>
+                                        <td ng-if="!ctrl.hasError(task)">[[ task.state|stateString ]]</td>
+                                        <td ng-if="ctrl.hasError(task)">
+                                            <a href="[[ task.errors ]]">[[ task.state|stateString ]]</a>
+                                        </td>
+                                        <td>{% trans 'Requested by:' %}</td>
+                                        <td>[[ task.requested_by ]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{% trans 'Created at:' %}</td>
+                                        <td>[[ task.created_at|date:'yyyy-MM-dd HH:mm:ss' ]]</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>{% trans 'Started at:' %}</td>
+                                        <td>[[ task.started_at|date:'yyyy-MM-dd HH:mm:ss' ]]</td>
+                                        <td>{% trans 'Queue wait:' %}</td>
+                                        <td>[[ task.$wait|timedelta ]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{% trans 'Finished at:' %}</td>
+                                        <td>[[ task.finished_at|date:'yyyy-MM-dd HH:mm:ss' ]]</td>
+                                        <td>{% trans 'Runtime:' %}</td>
+                                        <td>[[ task.$runtime|timedelta ]]</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </td>
                     </tr>
                 </tbody>

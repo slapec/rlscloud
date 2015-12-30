@@ -17,6 +17,34 @@ app.filter('percentage', ['$filter', function ($filter) {
     };
 }]);
 
+app.filter('timedelta', function(){
+    return function(delta){
+        if(typeof delta === 'string'){
+            return delta
+        }
+        else {
+            // Slightly modified version of
+            // http://stackoverflow.com/a/6313008
+
+            var deltaSeconds = Math.floor(delta / 1000);
+            var hours = Math.floor(deltaSeconds / 3600);
+            var minutes = Math.floor((deltaSeconds - (hours * 3600)) / 60);
+            var seconds = deltaSeconds - (hours * 3600) - (minutes * 60);
+
+            if (hours < 10){
+                hours = '0' + hours;
+            }
+            if (minutes < 10){
+                minutes = '0' + minutes;
+            }
+            if (seconds < 10) {
+                seconds = '0' + seconds;
+            }
+            return hours + ':' + minutes + ':' + seconds;
+        }
+    }
+});
+
 app.factory('options', function(){
     return JSON.parse($('#rlscloud-options').html());
 });

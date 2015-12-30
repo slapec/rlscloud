@@ -109,12 +109,11 @@ STATICFILES_DIRS = [
 ]
 
 # Paths ------------------------------------------------------------------------
-RELEASE_DIRECTORY = os.path.join(BASE_DIR, 'releases')
-YOUTUBE_DL_TEMPLATE = os.path.join(RELEASE_DIRECTORY, '%(title)s.%(ext)s')
+INCOMING_DIR = os.path.join(BASE_DIR, 'incoming')
+RELEASE_DIR = os.path.join(BASE_DIR, 'releases')
 
 # Workarounds ------------------------------------------------------------------
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'
-
 
 # Celery -----------------------------------------------------------------------
 CELERY_RESULT_BACKEND = 'amqp://'

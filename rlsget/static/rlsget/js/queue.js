@@ -4,9 +4,9 @@ app.filter('iconClass', function(){
     var states = {
         0: 'clock-o',
         1: 'download',
-        2: 'check',
-        3: 'exclamation',
-        4: 'refresh'
+        2: 'refresh',
+        3: 'check',
+        4: 'exclamation'
     };
 
     return function(stateCode){
@@ -18,9 +18,9 @@ app.filter('colorClass', function(){
     var states = {
         0: '',
         1: 'bg-info',
-        2: 'bg-success',
-        3: 'bg-warning',
-        4: 'bg-info'
+        2: 'bg-info',
+        3: 'bg-success',
+        4: 'bg-warning'
     };
 
     return function(stateCode){
@@ -40,8 +40,12 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
 
     var QUEUED = 0;
     var DOWNLOADING = 1;
-    var FINISHED = 2;
-    var ERROR = 3;
+    var PROCESSING = 2;
+    var FINISHED = 3;
+    var ERROR = 4;
+
+    var CANCELABLE_STATES = new Set([QUEUED, DOWNLOADING, PROCESSING]);
+    var ARCHIVABLE_STATES = new Set([FINISHED, ERROR]);
 
     var queueApi = urls.queue_api;
 
@@ -51,6 +55,7 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
         .success(function(reply){
             angular.forEach(reply, function(v){
                 switch(v.state){
+                    case(PROCESSING):
                     case(DOWNLOADING):
                         v.$progress = (v.downloaded / v.total) * 100;
                         break;
@@ -62,6 +67,23 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
                         v.$progress = 0;
                         break;
                 }
+
+                if(!v.started_at){
+                    v.started_at = options.i18n.na;
+                    v.$runtime = options.i18n.na;
+                    v.$wait = new Date() - new Date(v.created_at);
+                }
+                else {
+                    v.$runtime = new Date() - new Date(v.started_at);
+                    v.$wait = new Date(v.started_at) - new Date(v.created_at);
+                }
+
+                if(!v.finished_at){
+                    v.finished_at = options.i18n.na;
+                }
+                else {
+                    v.$runtime = new Date(v.finished_at) - new Date(v.started_at);
+                }
             });
             $scope.tasks = reply;
         })
@@ -71,7 +93,7 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
     };
 
     apiQuery();
-    var poller = $interval(apiQuery, 1000);
+    var poller = $interval(apiQuery, 3000);
 
     // Enqueueing URL ----------------------------------------------------------
     $scope.url = '';
@@ -85,6 +107,26 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
         .error(function(){
             console.log('e', arguments);
         })
+    };
+
+    self.archive = function(task){
+        $http.patch(queueApi, {id: task.id})
+            .success(function(){
+                apiQuery();
+            })
+            .error(function(){
+                console.log(2, arguments);
+            });
+    };
+
+    self.cancel = function(task){
+       $http.delete(queueApi, {id: task.id})
+           .success(function(){
+               apiQuery();
+           })
+           .error(function(){
+               console.log(2, arguments);
+           });
     };
 
     // "Details" row -----------------------------------------------------------
@@ -101,5 +143,17 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
         else {
             openDetails.add(task.id);
         }
+    };
+
+    self.isArchivable = function(task){
+        return ARCHIVABLE_STATES.has(task.state);
+    };
+
+    self.isCancelable = function(task){
+        return CANCELABLE_STATES.has(task.state)
+    };
+
+    self.hasError = function(task){
+        return task.state === ERROR;
     }
 }]);

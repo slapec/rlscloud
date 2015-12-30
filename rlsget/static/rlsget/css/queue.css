@@ -51,7 +51,7 @@
    width: 144px
 }
 
-.details-row td {
+.details-row > td {
     border-bottom: 3px solid #eceeef;
     font-size: smaller
 }

@@ -4,6 +4,7 @@ import os
 
 from celery.result import AsyncResult
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -11,68 +12,78 @@ from django.utils.translation import ugettext_lazy as _
 class DownloadTask(models.Model):
     QUEUED = 0
     DOWNLOADING = 1
-    FINISHED = 2
-    ERROR = 3
-    PROCESSING = 4
+    PROCESSING = 2
+    FINISHED = 3
+    ERROR = 4
 
     STATE_CHOICES = (
         (QUEUED, _('Queued')),
         (DOWNLOADING, _('Downloading')),
+        (PROCESSING, _('Processing')),
         (FINISHED, _('Finished')),
-        (ERROR, _('Error')),
-        (PROCESSING, _('Processing'))
+        (ERROR, _('Error'))
     )
 
-    FROM_YOUTUBE_DL = 0
-    FROM_FFMPEG = 1
+    YOUTUBE_DL = 0
 
-    SOURCE_CHOICES = (
-        (FROM_YOUTUBE_DL, _('From youtube-dl')),
-        (FROM_FFMPEG, _('From ffmpeg'))
+    DOWNLOADER_CHOICES = (
+        (YOUTUBE_DL, _('youtube-dl')),
     )
 
     url = models.TextField()
-    source = models.PositiveSmallIntegerField(choices=SOURCE_CHOICES, null=True)
-    is_hidden = models.BooleanField(default=False)
-    celery_task = models.UUIDField(null=True)
+    downloader = models.PositiveSmallIntegerField(choices=DOWNLOADER_CHOICES, null=True)
+    celery_id = models.UUIDField(null=True)
     state = models.PositiveSmallIntegerField(choices=STATE_CHOICES, default=QUEUED)
-    release = models.OneToOneField('rls.Release', null=True)
-
-    elapsed = models.FloatField(default=0)
-    size = models.PositiveIntegerField(null=True)
+    is_hidden = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True)
+    finished_at = models.DateTimeField(null=True)
+
+    release = models.OneToOneField('rls.Release', null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL)
 
     class Meta:
         ordering = ('-created_at', )
 
     def async_result(self):
-        return AsyncResult(str(self.celery_task))
+        return AsyncResult(str(self.celery_id))
 
     def as_dict(self) -> dict:
         result = {
-            'state': self.state,
             'url': self.url,
-            'id': self.celery_task,
+            'id': self.id,
+            'state': self.state,
+            'requested_by': self.created_by.username,
             'created_at': self.created_at,
-            'source': self.source
+            'started_at': self.started_at,
+            'finished_at': self.finished_at
         }
 
-        if self.state == self.DOWNLOADING:
+        if self.state in {self.DOWNLOADING, self.PROCESSING, self.ERROR}:
             info = self.async_result().info
             if info:
                 result.update({
                     'total': info['total_bytes'],
                     'downloaded': info['downloaded_bytes'],
-                    'elapsed': info['elapsed'],
-                    'filename': os.path.basename(info['filename'])
+                    'filename': os.path.basename(info['filename']).split('_', 1)[-1]
                 })
+            if self.state == self.ERROR:
+                # TODO: Continue here: Add task error listing endpoint
+                result['errors'] = '' # reverse('rlsget:errors', args=[self.id])
         elif self.state == self.FINISHED:
+            release = self.release
+
             result.update({
-                'total': self.size,
-                'downloaded': self.size,
-                'elapsed': self.elapsed,
-                'filename': os.path.basename(self.release.file.name)
+                'name': release.name,
+                'details': reverse('rls:details', args=[release.id])
             })
         return result
+
+
+class TaskTraceback(models.Model):
+    download_task = models.ForeignKey(DownloadTask, related_name='tracebacks')
+
+    text = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)

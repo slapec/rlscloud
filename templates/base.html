@@ -28,14 +28,21 @@
         {% block head %}
         {% endblock %}
     </head>
-    <body ng-app="{% block ng-app %}{% endblock %}">
+    <body ng-app="{% block ng-app %}rlscloud{% endblock %}">
         <div class="container-fluid">
             <nav class="navbar navbar-dark bg-inverse">
                 <a class="navbar-brand" href="{% url 'index' %}">rlscloud</a>
                 {% if user.is_authenticated %}
                 <ul class="nav navbar-nav">
-                    <li id="rlsget-queue" class="nav-item">
-                        <a class="nav-link" href="{% url 'rlsget:queue-list' %}">{% trans 'Queue' %}</a>
+                    <li id="rls-latest" class="nav-item">
+                        <a class="nav-link" href="{% url 'rls:latest' %}">{% trans 'Latest releases' %}</a>
+                    </li>
+                    <li id="rlsget" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">{% trans 'Add release' %}</a>
+                        <div class="dropdown-menu">
+                            <a href="{% url 'rlsget:queue-list' %}" class="dropdown-item">{% trans 'From URL' %}</a>
+                            <a href="#" class="dropdown-item">{% trans 'Upload' %}</a>
+                        </div>
                     </li>
                 </ul>
                 {% endif %}
