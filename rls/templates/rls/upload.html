@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'rls/css/upload.css' %}">
+    <script src="{% static 'rls/js/upload.js' %}"></script>
+{% endblock %}
+
+{% block ng-app %}rlscloud.rls.upload{% endblock %}
+
+{% block content %}
+    <div class="row" ng-controller="Upload as ctrl">
+        <div class="col-lg-12">
+            <h3>{% trans 'Release upload' %}</h3>
+        </div>
+        <div class="col-lg-12">
+            <form id="upload-form" ng-submit="ctrl.enqueueTask()" class="form-group">
+                <label for="browse" class="btn btn-secondary">{% trans 'Browse files ...' %}</label>
+                <input id="browse" type="file" multiple model="files">
+            </form>
+            <table id="upload-table" class="table">
+                <thead>
+                    <tr>
+                        <th class="state-icon-col"></th>
+                        <th class="filename-col">{% trans 'Filename' %}</th>
+                        <th></th>
+                        <th class="operations-col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-if="!files.length">
+                        <td colspan="4" class="empty-table">{% trans 'Browse files or drop some here.' %}</td>
+                    </tr>
+                    <tr ng-repeat="file in files">
+                        <td class="text-xs-center" ng-class="file.$state|colorClass"><i class="fa fa-2 fa-[[ file.$state|iconClass ]]"></i></td>
+                        <td class="filename">[[ file.name ]]</td>
+                        <td>
+                            <progress class="progress progress-info" value="[[ file.$progress|percentage ]]" max="100"></progress>
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary" ng-click="ctrl.cancel(file)">
+                                <i class="fa fa-2 fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+{% endblock %}

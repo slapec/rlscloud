@@ -9,11 +9,11 @@ app.config(['$httpProvider', '$interpolateProvider', function($httpProvider, $in
 }]);
 
 app.filter('percentage', ['$filter', function ($filter) {
-    return function (input, decimals) {
-        if(decimals === undefined){
-            decimals = 2;
+    return function (input) {
+        if(!input){
+            input = 0;
         }
-        return $filter('number')(input, decimals) + '%';
+        return $filter('number')(input, 2);
     };
 }]);
 

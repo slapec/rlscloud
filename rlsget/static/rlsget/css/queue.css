@@ -1,8 +1,3 @@
-.empty-queue-cell {
-    text-align: center;
-    color: #55595c;
-}
-
 #queue-table {
     table-layout: fixed;
 }
@@ -28,10 +23,6 @@
     top: -18px;
     color: #373a3c;
     font-size: smaller;
-}
-
-.center {
-    text-align: center;
 }
 
 .state-icon-col {

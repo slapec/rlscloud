@@ -39,3 +39,12 @@ thead th {
 .modal-header h3 {
     margin-bottom: 0;
 }
+
+.empty-table {
+    text-align: center;
+    color: #55595c;
+}
+
+label.btn {
+    margin-bottom: 0;
+}
