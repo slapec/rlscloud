@@ -34,7 +34,7 @@ class QueueView(TemplateView):
 @method_decorator(login_required, name='dispatch')
 class QueueApi(View):
     def get(self, request):
-        qs = DownloadTask.objects.filter(is_hidden=False).prefetch_related('release', 'created_by')
+        qs = DownloadTask.objects.filter(is_archived=False).prefetch_related('release', 'created_by')
         download_queue = [_.as_dict() for _ in qs]
         return JsonResponse(download_queue, safe=False)
 
@@ -46,13 +46,24 @@ class QueueApi(View):
         else:
             return JsonResponse(form.errors, status=400)
 
-    def patch(self, request):
-        download_task = get_object_or_404(DownloadTask, pk=request.POST['id'], is_hidden=False)
+
+@method_decorator(login_required, name='dispatch')
+class TaskApi(View):
+    def patch(self, request, task_id):
+        task = get_object_or_404(DownloadTask, pk=task_id, state__in=DownloadTask.ARCHIVABLE_STATES, is_archived=False)
         with transaction.atomic():
-            download_task.is_hidden = True
-            download_task.save()
+            task.is_archived = True
+            task.save()
             return JsonResponse({})
 
-    def delete(self, request):
-        # TODO: Continue here: implement task cancellation
-        print(request.POST)
+    def delete(self, request, task_id):
+        task = get_object_or_404(DownloadTask, pk=task_id, state__in=DownloadTask.CANCELABLE_STATES)
+        task.cancel()
+        return JsonResponse({})
+
+
+@method_decorator(login_required, name='dispatch')
+class TracebackApi(View):
+    def get(self, request, task_id):
+        task = get_object_or_404(DownloadTask, pk=task_id, state=DownloadTask.ERROR)
+        return JsonResponse([_.as_dict() for _ in task.tracebacks.all()], safe=False)

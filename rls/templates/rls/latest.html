@@ -24,7 +24,7 @@
                     {% for rls in releases %}
                     <tr>
                         <td>{{ rls.created_at }}</td>
-                        <td><a href="{% url 'rls:details' rls.id %}">{{ rls.title }}</a></td>
+                        <td><a href="{% url 'rls:details' rls.id %}">{{ rls.name }}</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>

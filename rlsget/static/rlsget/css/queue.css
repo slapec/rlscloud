@@ -76,5 +76,7 @@
     overflow: hidden;
 }
 
-
+.error-log-box {
+    border-bottom: 3px solid #eceeef;
+}
 

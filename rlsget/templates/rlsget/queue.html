@@ -71,7 +71,7 @@
                                         <td>{% trans 'State:' %}</td>
                                         <td ng-if="!ctrl.hasError(task)">[[ task.state|stateString ]]</td>
                                         <td ng-if="ctrl.hasError(task)">
-                                            <a href="[[ task.errors ]]">[[ task.state|stateString ]]</a>
+                                            <a href="#" ng-click="ctrl.loadErrors(task)">[[ task.state|stateString ]]</a>
                                         </td>
                                         <td>{% trans 'Requested by:' %}</td>
                                         <td>[[ task.requested_by ]]</td>
@@ -100,6 +100,23 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="modal fade" id="task-errors-modal" tabindex="-1">
+            <div class="modal-dialog modal-lg-resp">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" data-dismiss="modal"><span>&times;</span></button>
+                        <h3>{% trans 'Error logs' %}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="error-log-box" ng-repeat="error in taskErrors">
+                            <div>[[ error.created_at|date:'yyyy-MM-dd HH:mm:ss' ]]</div>
+                            <pre>[[ error.text ]]</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

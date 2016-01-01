@@ -6,7 +6,8 @@ app.filter('iconClass', function(){
         1: 'download',
         2: 'refresh',
         3: 'check',
-        4: 'exclamation'
+        4: 'exclamation',
+        5: 'times'
     };
 
     return function(stateCode){
@@ -20,7 +21,8 @@ app.filter('colorClass', function(){
         1: 'bg-info',
         2: 'bg-info',
         3: 'bg-success',
-        4: 'bg-warning'
+        4: 'bg-danger',
+        5: 'bg-warning'
     };
 
     return function(stateCode){
@@ -43,9 +45,10 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
     var PROCESSING = 2;
     var FINISHED = 3;
     var ERROR = 4;
+    var CANCLED = 5;
 
     var CANCELABLE_STATES = new Set([QUEUED, DOWNLOADING, PROCESSING]);
-    var ARCHIVABLE_STATES = new Set([FINISHED, ERROR]);
+    var ARCHIVABLE_STATES = new Set([FINISHED, ERROR, CANCLED]);
 
     var queueApi = urls.queue_api;
 
@@ -110,7 +113,7 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
     };
 
     self.archive = function(task){
-        $http.patch(queueApi, {id: task.id})
+        $http.patch(task.api)
             .success(function(){
                 apiQuery();
             })
@@ -120,13 +123,13 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
     };
 
     self.cancel = function(task){
-       $http.delete(queueApi, {id: task.id})
-           .success(function(){
-               apiQuery();
-           })
-           .error(function(){
-               console.log(2, arguments);
-           });
+        $http.delete(task.api)
+        .success(function(){
+            apiQuery();
+        })
+        .error(function(){
+            console.log(2, arguments);
+        });
     };
 
     // "Details" row -----------------------------------------------------------
@@ -134,7 +137,18 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
 
     self.isDetailsOpen = function(task){
         return openDetails.has(task.id);
-    } ;
+    };
+
+    self.loadErrors = function(task){
+        $http.get(task.errors)
+        .success(function(reply){
+            $scope.taskErrors = reply;
+            $('#task-errors-modal').modal('show');
+        })
+        .error(function(){
+            console.log(2, arguments);
+        })
+    };
 
     self.toggleDetails = function(task){
         if(self.isDetailsOpen(task)){

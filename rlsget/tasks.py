@@ -5,12 +5,12 @@ import os
 import shutil
 import time
 import traceback
-from typing import Optional
+from typing import Optional, Tuple, List, Dict
 
-import requests
 from celery.utils.log import get_task_logger
 from django.conf import settings
-from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db import transaction, Error as BaseDatabaseError
 from django.utils import timezone
 from youtube_dl import YoutubeDL
 from youtube_dl.postprocessor.common import PostProcessor
@@ -30,7 +30,7 @@ class YoutubeDLTask(app.Task):
     YOUTUBE_DL_OPTIONS = {
         'quiet': True,
         'noplaylist': True,
-        'outtmpl': os.path.join(settings.INCOMING_DIR, '{0}_%(title)s.%(ext)s')
+        'outtmpl': os.path.join(settings.INCOMING_DIR, '{0}_%(title)s.%(ext)s'),
     }
 
     ignore_result = True
@@ -42,6 +42,7 @@ class YoutubeDLTask(app.Task):
 
     def _progress_hook(self, status: dict) -> None:
         if not self.request.called_directly:
+            self._last_status = status
             if status['status'] == 'downloading':
                 self.update_state(state='PROGRESS', meta=status)
             elif status['status'] == 'finished':
@@ -49,28 +50,24 @@ class YoutubeDLTask(app.Task):
                     self.download_task.state = DownloadTask.PROCESSING
                     self.download_task.save()
 
-    def _hash_progress_hook(self, size, position):
-        if hasattr(self, '_hash_start'):
+    def _hash_progress_hook(self, size: int, position: int) -> None:
+        try:
             if time.time() - self._hash_start > 1000:
-                status = {
+                self.update_state(state='PROGRESS', meta={
                     'status': 'downloading',
                     'total_bytes': size,
                     'downloaded_bytes': position
-                }
-                self.update_state(state='PROGRESS', meta=status)
-        else:
+                })
+            else:
+                self._hash_start = time.time()
+        except AttributeError:
             self._hash_start = time.time()
 
-    def _pre_check(self) -> None:
-        requests.get(self.download_task.url, headers={
-            'User-Agent': settings.USER_AGENT
-        })
-
-    def _get_postprocessor(self) -> PostProcessor:
+    def _get_postprocessor(self):
         parent = self
 
         class YoutubeDLTaskPostprocessor(PostProcessor):
-            def run(self, information):
+            def run(self, information: dict) -> Tuple[List, Dict]:
                 download_task = parent.download_task
 
                 name = information['title']
@@ -107,12 +104,6 @@ class YoutubeDLTask(app.Task):
                 self.download_task.state = DownloadTask.DOWNLOADING
                 self.download_task.started_at = timezone.now()
                 self.download_task.save()
-        except:
-            # TODO: Log DB error to file
-            raise
-
-        try:
-            self._pre_check()
 
             options = copy.deepcopy(self.YOUTUBE_DL_OPTIONS)
             options['outtmpl'] = options['outtmpl'].format(self.request.id.replace('-', ''))
@@ -125,14 +116,31 @@ class YoutubeDLTask(app.Task):
             downloader = YoutubeDL(options)
             downloader.add_post_processor(self._get_postprocessor())
             downloader.download([self.download_task.url])
-        except:
-            # TODO: Log DB error to file
-            with transaction.atomic():
-                self.download_task.state = DownloadTask.ERROR
-                self.download_task.finished_at = timezone.now()
-                self.download_task.save()
-
-                self.download_task.tracebacks.create(text=traceback.format_exc())
+        except SystemExit:
+            try:
+                os.remove(self._last_status['tmpfilename'])
+            except AttributeError:
+                return
+            except:
+                log.exception('Exception while removing temporary file. id={0}, tempfilename={1}'.format(
+                        release_task_pk, self._last_status['tmpfilename'])
+                )
+                raise
+        except (BaseDatabaseError, ObjectDoesNotExist, MultipleObjectsReturned):
+            # Hope we've caught everything
+            log.exception('Exception while updating DownloadTask. id={0}'.format(release_task_pk))
             raise
+        except:
+            try:
+                with transaction.atomic():
+                    self.download_task.state = DownloadTask.ERROR
+                    self.download_task.finished_at = timezone.now()
+                    self.download_task.save()
+
+                    self.download_task.tracebacks.create(text=traceback.format_exc())
+                raise
+            except (BaseDatabaseError, ObjectDoesNotExist, MultipleObjectsReturned):
+                log.exception('Exception while changing DownloadTask.state to ERROR. id={0}'.format(release_task_pk))
+                raise
 
 youtube_dl = YoutubeDLTask()

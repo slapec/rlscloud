@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+from kombu import Queue, Exchange
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -120,3 +122,7 @@ CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_DEFAULT_QUEUE = 'rlscloud'
+CELERY_QUEUES = (
+    Queue('rlscloud', Exchange('rlscloud'), routing_key='default'),
+)
