@@ -2,6 +2,16 @@ thead th {
     text-align: center
 }
 
+.detail-type {
+    color: #c6c8c9
+}
+
+.monospace {
+    color: #373a3c;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+    white-space: pre;
+}
+
 .progress[value]::-webkit-progress-value {
     border-radius: 0;
 }

@@ -2,3 +2,6 @@ celery
 Django
 requests
 youtube-dl
+pymediainfo
+beautifulsoup4
+lxml
