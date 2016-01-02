@@ -2,6 +2,10 @@ thead th {
     text-align: center
 }
 
+.progress[value]::-webkit-progress-value {
+    border-radius: 0;
+}
+
 .fa-2 {
     font-size: 1.2em
 }

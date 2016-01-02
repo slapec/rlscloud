@@ -13,6 +13,7 @@ app.filter('percentage', ['$filter', function ($filter) {
         if(!input){
             input = 0;
         }
+
         return $filter('number')(input, 2);
     };
 }]);
@@ -44,6 +45,31 @@ app.filter('timedelta', function(){
         }
     }
 });
+
+app.filter('speed', ['$filter', function($filter){
+    var kbyte = 1024;
+    var mbyte = 1024 * kbyte;
+    var gbyte = 1024 * mbyte;
+
+    return function(value){
+        var speed = 0;
+        var prefix = 'B';
+        if(value > gbyte){
+            speed = $filter('number')(value / gbyte, 2);
+            prefix = 'GiB';
+        }
+        else if(value > mbyte){
+            speed = $filter('number')(value / mbyte, 2);
+            prefix = 'MiB';
+        }
+        else if(value > kbyte){
+            speed = $filter('number')(value / kbyte, 2);
+            prefix = 'KiB';
+        }
+
+        return speed + ' ' + prefix + '/s';
+    }
+}]);
 
 app.factory('options', function(){
     return JSON.parse($('#rlscloud-options').html());

@@ -10,6 +10,12 @@
     vertical-align: middle!important;
 }
 
+#browse-label {
+    width: 100%;
+    white-space: normal;
+    line-height: 60px
+}
+
 .progress {
     margin-bottom: 0!important;
 }
@@ -34,6 +40,10 @@
     width: 40%
 }
 
+.speed-col {
+    width: 140px
+}
+
 .operations-col {
     width: 70px;
 }
@@ -42,4 +52,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.speed {
+    text-align: right;
+    white-space: nowrap;
 }
