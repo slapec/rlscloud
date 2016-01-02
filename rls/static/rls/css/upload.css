@@ -1,0 +1,60 @@
+#browse {
+    display: none;
+}
+
+#upload-table {
+    table-layout: fixed;
+}
+
+#upload-table td {
+    vertical-align: middle!important;
+}
+
+#browse-label {
+    width: 100%;
+    white-space: normal;
+    line-height: 60px
+}
+
+.progress {
+    margin-bottom: 0!important;
+}
+
+.progress::after {
+    content: attr(value) '%';
+    display: block;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    top: -18px;
+    color: #373a3c;
+    font-size: smaller;
+}
+
+.state-icon-col {
+    width: 3em;
+    text-align: center;
+}
+
+.filename-col {
+    width: 40%
+}
+
+.speed-col {
+    width: 140px
+}
+
+.operations-col {
+    width: 70px;
+}
+
+.filename {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.speed {
+    text-align: right;
+    white-space: nowrap;
+}

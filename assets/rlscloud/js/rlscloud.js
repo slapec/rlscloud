@@ -9,11 +9,12 @@ app.config(['$httpProvider', '$interpolateProvider', function($httpProvider, $in
 }]);
 
 app.filter('percentage', ['$filter', function ($filter) {
-    return function (input, decimals) {
-        if(decimals === undefined){
-            decimals = 2;
+    return function (input) {
+        if(!input){
+            input = 0;
         }
-        return $filter('number')(input, decimals) + '%';
+
+        return $filter('number')(input, 2);
     };
 }]);
 
@@ -44,6 +45,31 @@ app.filter('timedelta', function(){
         }
     }
 });
+
+app.filter('speed', ['$filter', function($filter){
+    var kbyte = 1024;
+    var mbyte = 1024 * kbyte;
+    var gbyte = 1024 * mbyte;
+
+    return function(value){
+        var speed = 0;
+        var prefix = 'B';
+        if(value > gbyte){
+            speed = $filter('number')(value / gbyte, 2);
+            prefix = 'GiB';
+        }
+        else if(value > mbyte){
+            speed = $filter('number')(value / mbyte, 2);
+            prefix = 'MiB';
+        }
+        else if(value > kbyte){
+            speed = $filter('number')(value / kbyte, 2);
+            prefix = 'KiB';
+        }
+
+        return speed + ' ' + prefix + '/s';
+    }
+}]);
 
 app.factory('options', function(){
     return JSON.parse($('#rlscloud-options').html());

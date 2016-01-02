@@ -29,10 +29,10 @@
                 </thead>
                 <tbody>
                     <tr ng-if="!tasks.length">
-                        <td colspan="4" class="empty-queue-cell">{% trans 'The queue is empty' %}</td>
+                        <td colspan="4" class="empty-table">{% trans 'The queue is empty' %}</td>
                     </tr>
                     <tr ng-repeat-start="task in tasks">
-                        <td class="center" ng-class="task.state|colorClass"><i class="fa fa-2 fa-[[ task.state|iconClass ]]"></i></td>
+                        <td class="text-xs-center" ng-class="task.state|colorClass"><i class="fa fa-2 fa-[[ task.state|iconClass ]]"></i></td>
                         <td>
                             <div ng-if="task.details">
                                 <a ng-href="[[ task.details ]]">[[ task.name ]]</a>
@@ -46,7 +46,7 @@
                             </div>
                         </td>
                         <td>
-                            <progress class="progress progress-info" value="[[ task.$progress|number ]]" max="100"></progress>
+                            <progress class="progress progress-info" value="[[ task.$progress|percentage ]]" max="100"></progress>
                         </td>
                         <td>
                             <div class="btn-group">
