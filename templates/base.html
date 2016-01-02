@@ -41,7 +41,7 @@
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">{% trans 'Add release' %}</a>
                         <div class="dropdown-menu">
                             <a href="{% url 'rlsget:queue-list' %}" class="dropdown-item">{% trans 'From URL' %}</a>
-                            <a href="#" class="dropdown-item">{% trans 'Upload' %}</a>
+                            <a href="{% url 'rls:upload' %}" class="dropdown-item">{% trans 'From upload' %}</a>
                         </div>
                     </li>
                 </ul>

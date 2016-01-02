@@ -8,7 +8,7 @@ from rlsget.models import DownloadTask
 
 class Release(models.Model):
     name = models.CharField(max_length=256)
-    file = models.FileField(upload_to=settings.INCOMING_DIR)
+    file = models.FileField(upload_to=settings.RELEASE_DIR)
     file_hash = models.CharField(max_length=32)
 
     created_at = models.DateTimeField(auto_now_add=True)
