@@ -85,6 +85,7 @@ app.controller('Upload', ['$scope', 'options', 'urls', function($scope, options,
 
         if(nextFile){
             uploadInProgress = true;
+            nextFile.$state = 'uploading';
 
             var form = new FormData();
             form.append('file', nextFile);
@@ -113,6 +114,7 @@ app.controller('Upload', ['$scope', 'options', 'urls', function($scope, options,
                     };
 
                     xhr.upload.onerror = function(e){
+                        console.log('upload.onerror', e);
                         $scope.$applyAsync(function(){
                             nextFile.$state = 'error';
                         });
@@ -135,7 +137,12 @@ app.controller('Upload', ['$scope', 'options', 'urls', function($scope, options,
 
                     return xhr;
                 }
+            }).success(function(reply){
+                $scope.$applyAsync(function(){
+                    nextFile.url = reply.url;
+                })
             })
+
         }
     };
 

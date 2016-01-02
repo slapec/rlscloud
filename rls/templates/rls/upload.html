@@ -32,7 +32,9 @@
                 <tbody>
                     <tr ng-repeat="file in files">
                         <td class="text-xs-center" ng-class="file.$state|colorClass"><i class="fa fa-2 fa-[[ file.$state|iconClass ]]"></i></td>
-                        <td class="filename">[[ file.name ]]</td>
+                        <td ng-if="!file.url" class="filename">[[ file.name ]]</td>
+                        <td ng-if="file.url" class="filename">
+                            <a href="[[ file.url ]]">[[ file.name ]]</a></td>
                         <td>
                             <progress class="progress progress-info" value="[[ file.$progress|percentage ]]" max="100"></progress>
                         </td>

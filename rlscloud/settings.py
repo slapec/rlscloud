@@ -113,6 +113,11 @@ STATICFILES_DIRS = [
 # Paths ------------------------------------------------------------------------
 INCOMING_DIR = os.path.join(BASE_DIR, 'incoming')
 RELEASE_DIR = os.path.join(BASE_DIR, 'releases')
+FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR, 'incoming_upload')
+
+FILE_UPLOAD_HANDLERS = (
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+)
 
 # Workarounds ------------------------------------------------------------------
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'

@@ -8,7 +8,9 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView, View
 
+from rls.forms import ReleaseUploadForm
 from rls.models import Release
+from rls.utils import hash_file
 
 
 @method_decorator(login_required, name='dispatch')
@@ -55,6 +57,12 @@ class Upload(View):
         return render(request, 'rls/upload.html', ctx)
 
     def post(self, request):
-        print(request.FILES['file'].temporary_file_path())
+        form = ReleaseUploadForm(request.POST, request.FILES, created_by=request.user)
 
-        return JsonResponse({})
+        if form.is_valid():
+            form.save()
+            return JsonResponse({
+                'url': reverse('rls:details', args=[form.instance.pk])
+            })
+        else:
+            return JsonResponse(form.errors, status=400)
