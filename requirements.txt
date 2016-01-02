@@ -1,6 +1,7 @@
 celery
 Django
 requests
+requests-toolbelt
 youtube-dl
 pymediainfo
 beautifulsoup4

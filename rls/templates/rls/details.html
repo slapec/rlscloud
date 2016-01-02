@@ -5,19 +5,22 @@
 
 {% block head %}
 {#    <link rel="stylesheet" href="{% static 'rlsget/css/details.css' %}">#}
-{#    <script src="{% static 'rlsget/js/queue.js' %}"></script>#}
+    <script src="{% static 'rls/js/details.js' %}"></script>
 {% endblock %}
 
-{#{% block ng-app %}rlscloud{% endblock %}#}
+{% block ng-app %}rlscloud.rls.details{% endblock %}
 
 {% block content %}
-    <div class="row">
+    <div class="row" ng-controller="Details as ctrl">
         <div class="col-lg-12">
             <h3>{{ release.name }} <span class="detail-type">({% trans 'release' %})</span></h3>
         </div>
         <div class="col-lg-12">
             {% trans 'MD5:' %}<span id="md5" class="monospace">{{ release.file_hash }}</span>
             <a href="{{ release.file.url }}">{% trans 'Download' %}</a>
+            <button class="btn btn-secondary" ng-click="ctrl.encodeRequest('{% url "encode:request" release.id %}')">
+                {% trans 'Require encoding' %}
+            </button>
         </div>
     </div>
 {% endblock %}

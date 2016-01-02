@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-
+from urllib.parse import urljoin
 from kombu import Queue, Exchange
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rls',
+    'encode',
     'rlsget',
     'utils'
 )
@@ -125,11 +126,29 @@ FILE_UPLOAD_HANDLERS = (
 USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'
 
 # Celery -----------------------------------------------------------------------
+BROKER_URL = 'amqp://192.168.1.2'
 CELERY_RESULT_BACKEND = 'amqp://'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_DEFAULT_QUEUE = 'rlscloud'
+
 CELERY_QUEUES = (
-    Queue('rlscloud', Exchange('rlscloud'), routing_key='default'),
+    Queue('rlsget', Exchange('rlsget'), routing_key='rlsget'),
+    Queue('encode', Exchange('encode'), routing_key='encode')
 )
+
+CELERY_ROUTES = {
+    'rlsget.tasks.YoutubeDLTask': {
+        'queue': 'rlsget',
+    },
+    'encode.tasks.EncoderTask': {
+        'queue': 'encode'
+    }
+}
+
+# Remote encoding -------------------------------------------------------------
+ENCODE_RLSCLOUD_AUTH_USER = ''
+ENCODE_RLSCLOUD_AUTH_PWD = ''
+ENCODE_RLSCLOUD_SERVER = ''
+ENCODE_RLSCLOUD_UPLOAD = urljoin(ENCODE_RLSCLOUD_SERVER, '/rls/upload/')
+ENCODE_FFMPEG_PATH = 'ffmpeg'
