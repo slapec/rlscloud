@@ -46,8 +46,9 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 
-releases/
-incoming/
-incoming_upload/
+/static/
+/media/
+/incoming/
 
-db.sqlite3
+/rlscloud/settings.py
+*.sqlite3

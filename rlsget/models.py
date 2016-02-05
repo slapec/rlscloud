@@ -79,7 +79,7 @@ class DownloadTask(models.Model):
 
         if self.state in {self.DOWNLOADING, self.PROCESSING, self.ERROR}:
             info = self.async_result().info
-            if info:
+            if info and 'filename' in info:
                 result.update({
                     'total': info['total_bytes'],
                     'downloaded': info['downloaded_bytes'],
