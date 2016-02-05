@@ -4,31 +4,17 @@
 {% load static %}
 
 {% block head %}
-{#    <link rel="stylesheet" href="{% static 'rlsget/css/queue.css' %}">#}
-{#    <script src="{% static 'rlsget/js/queue.js' %}"></script>#}
+    <script src="{% static 'rls/js/latest.js' %}"></script>
 {% endblock %}
 
-{#{% block ng-app %}rlscloud{% endblock %}#}
+{% block ng-app %}rlscloud.rls.latest{% endblock %}
 
 {% block content %}
     <div class="row">
         <div class="col-lg-12">
-            <table id="latest-table" class="table">
-                <thead class="thead-default">
-                    <tr>
-                        <th class="created-at-col">{% trans 'Added' %}</th>
-                        <th class="name-col">{% trans 'Title' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for rls in releases %}
-                    <tr>
-                        <td>{{ rls.created_at }}</td>
-                        <td><a href="{% url 'rls:details' rls.id %}">{{ rls.name }}</a></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% for rls in releases %}
+                <thumbnail url="{% url 'rls:details' rls.id %}" image="{{ rls.thumbnail.url }}" width="{{ thumbnail_width }}" height="{{ thumbnail_height }}" frames="{{ thumbnail_count }}"></thumbnail>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

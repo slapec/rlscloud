@@ -7,3 +7,4 @@ pymediainfo
 beautifulsoup4
 lxml
 psycopg2
+pillow

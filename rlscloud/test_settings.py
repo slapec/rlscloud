@@ -115,6 +115,7 @@ STATICFILES_DIRS = [
 # Paths ------------------------------------------------------------------------
 INCOMING_DIR = os.path.join(BASE_DIR, 'incoming')
 RELEASE_DIR = 'releases/'
+THUMBNAILS_DIR = 'thumbnails/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -135,7 +136,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_QUEUES = (
     Queue('rlsget', Exchange('rlsget'), routing_key='rlsget'),
-    Queue('encode', Exchange('encode'), routing_key='encode')
+    Queue('encode', Exchange('encode'), routing_key='encode'),
+    Queue('rlscloud', Exchange('rlscloud'))
 )
 
 CELERY_ROUTES = {
@@ -144,6 +146,9 @@ CELERY_ROUTES = {
     },
     'encode.tasks.EncoderTask': {
         'queue': 'encode'
+    },
+    'rls.tasks.CreateThumbnailTask': {
+        'queue': 'rlscloud'
     }
 }
 
@@ -153,3 +158,8 @@ ENCODE_RLSCLOUD_AUTH_PWD = ''
 ENCODE_RLSCLOUD_SERVER = ''
 ENCODE_RLSCLOUD_UPLOAD = urljoin(ENCODE_RLSCLOUD_SERVER, '/rls/upload/')
 ENCODE_FFMPEG_PATH = 'ffmpeg'
+
+# Thumbnail generation ---------------------------------------------------------
+
+THUMBNAIL_COUNT = 10
+THUMBNAIL_SIZE = (360, 270)

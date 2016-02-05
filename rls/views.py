@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import JsonResponse
@@ -10,7 +11,6 @@ from django.views.generic import TemplateView, View
 
 from rls.forms import ReleaseUploadForm
 from rls.models import Release
-from rls.utils import hash_file
 
 
 @method_decorator(login_required, name='dispatch')
@@ -18,12 +18,17 @@ class Latest(TemplateView):
     template_name = 'rls/latest.html'
 
     def get_context_data(self, **kwargs):
+        thumbnail_width, thumbnail_height = settings.THUMBNAIL_SIZE
+
         context = super().get_context_data(**kwargs)
         context.update({
             'rlscloud_options': {
-                'active': 'rls-latest',
+                'active': 'rls-latest'
             },
             'releases': Release.objects.all(),
+            'thumbnail_count': settings.THUMBNAIL_COUNT,
+            'thumbnail_width': thumbnail_width,
+            'thumbnail_height': thumbnail_height
         })
         return context
 

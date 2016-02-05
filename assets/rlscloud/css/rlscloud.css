@@ -62,3 +62,7 @@ thead th {
 label.btn {
     margin-bottom: 0;
 }
+
+thumbnail .image {
+    display: inline-block
+}
