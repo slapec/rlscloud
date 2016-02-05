@@ -73,16 +73,17 @@ class YoutubeDLTask(app.Task):
                 name = information['title']
                 source = information['filepath']
                 file_hash = hash_file(source, progress_hook=parent._hash_progress_hook)
-                destination = os.path.join(settings.RELEASE_DIR, file_hash + os.path.splitext(source)[-1])
+                media_destination = os.path.join(settings.RELEASE_DIR, file_hash + os.path.splitext(source)[-1])
+                absolute_destination = os.path.join(settings.MEDIA_ROOT, media_destination)
 
                 # TODO: Check if file already exists
-                shutil.move(source, destination)
+                shutil.move(source, absolute_destination)
 
                 # TODO: This doesn't rolls back
                 with transaction.atomic():
                     release = Release()
                     release.name = name
-                    release.file = destination
+                    release.file = media_destination
                     release.created_by = download_task.created_by
                     release.file_hash = file_hash
                     release.save()

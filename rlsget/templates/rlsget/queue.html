@@ -77,6 +77,18 @@
                                         <td>[[ task.requested_by ]]</td>
                                     </tr>
                                     <tr>
+                                        <td>{% trans 'Size:' %}</td>
+                                        <td>[[ task.total|size ]]</td>
+                                        <td>{% trans 'Speed' %}</td>
+                                        <td>[[ task.$speed|speed ]]</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{% trans 'Downloaded' %}</td>
+                                        <td>[[ task.downloaded|size ]]</td>
+                                        <td>{% trans 'ETA' %}</td>
+                                        <td>[[ task.$eta|timedelta ]]</td>
+                                    </tr>
+                                    <tr>
                                         <td>{% trans 'Created at:' %}</td>
                                         <td>[[ task.created_at|date:'yyyy-MM-dd HH:mm:ss' ]]</td>
                                         <td></td>

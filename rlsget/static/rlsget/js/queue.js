@@ -74,11 +74,13 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
                 if(!v.started_at){
                     v.started_at = options.i18n.na;
                     v.$runtime = options.i18n.na;
+                    v.$speed = options.i18n.na;
                     v.$wait = new Date() - new Date(v.created_at);
                 }
                 else {
                     v.$runtime = new Date() - new Date(v.started_at);
                     v.$wait = new Date(v.started_at) - new Date(v.created_at);
+                    v.$speed = v.downloaded / (v.$runtime / 1000);
                 }
 
                 if(!v.finished_at){
@@ -86,6 +88,7 @@ app.controller('QueueList', ['$http', '$scope', '$interval', 'urls', 'options', 
                 }
                 else {
                     v.$runtime = new Date(v.finished_at) - new Date(v.started_at);
+                    v.$speed = v.downloaded / (v.$runtime / 1000);
                 }
             });
             $scope.tasks = reply;

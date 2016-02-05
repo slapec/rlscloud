@@ -46,14 +46,14 @@ app.filter('timedelta', function(){
     }
 });
 
-app.filter('speed', ['$filter', function($filter){
+app.filter('size', ['$filter', function($filter){
     var kbyte = 1024;
     var mbyte = 1024 * kbyte;
     var gbyte = 1024 * mbyte;
 
     return function(value){
-        var speed = 0;
-        var prefix = 'B';
+        var speed;
+        var prefix;
         if(value > gbyte){
             speed = $filter('number')(value / gbyte, 2);
             prefix = 'GiB';
@@ -66,8 +66,18 @@ app.filter('speed', ['$filter', function($filter){
             speed = $filter('number')(value / kbyte, 2);
             prefix = 'KiB';
         }
+        else {
+            speed = value;
+            prefix = 'B'
+        }
 
-        return speed + ' ' + prefix + '/s';
+        return speed + ' ' + prefix;
+    }
+}]);
+
+app.filter('speed', ['$filter', function($filter){
+    return function(value){
+        return $filter('size')(value) + '/s';
     }
 }]);
 

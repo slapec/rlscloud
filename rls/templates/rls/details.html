@@ -4,20 +4,29 @@
 {% load static %}
 
 {% block head %}
-{#    <link rel="stylesheet" href="{% static 'rlsget/css/details.css' %}">#}
-{#    <script src="{% static 'rlsget/js/queue.js' %}"></script>#}
+    <link rel="stylesheet" href="{% static 'rls/css/details.css' %}">
+    <link href="{% static 'videojs/css/video-js.min.css' %}" rel="stylesheet">
+    <script src="{% static 'videojs/js/video.min.js' %}"></script>
+
+    <script src="{% static 'rls/js/details.js' %}"></script>
 {% endblock %}
 
-{#{% block ng-app %}rlscloud{% endblock %}#}
+{% block ng-app %}rlscloud.rls.details{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-lg-12">
+    <div ng-controller="Details as app" class="row">
+        <div class="col-lg-12" ng-if="!isPlaying">
             <h3>{{ release.name }} <span class="detail-type">({% trans 'release' %})</span></h3>
         </div>
-        <div class="col-lg-12">
+        <div class="col-lg-12" ng-if="!isPlaying">
             {% trans 'MD5:' %}<span id="md5" class="monospace">{{ release.file_hash }}</span>
             <a href="{{ release.file.url }}">{% trans 'Download' %}</a>
+            <button ng-click="app.showPlayer()" class="btn btn-secondary">{% trans 'Play' %}</button>
+        </div>
+        <div class="col-lg-12" ng-show="isPlaying">
+            <video id="player" class="video-js vjs-default-skin" controls preload="auto">
+                <source src="{{ release.file.url }}" type='video/mp4'/>
+            </video>
         </div>
     </div>
 {% endblock %}
